@@ -66,7 +66,7 @@ async function postRelease(client, title, url) {
     }
     
     throw error;
-  });
+  }
 }
 
 async function main() {
