@@ -4,8 +4,14 @@
  * X (Twitter) スレッド投稿スクリプト
  *
  * 使い方:
- *   node scripts/post-thread.js "ツイート1" "ツイート2" "ツイート3"
- *   node scripts/post-thread.js --file README.md
+ *   node scripts/post-thread.js --file RELEASE_NOTES.md
+ *
+ * ファイル形式（---でツイートを区切る）:
+ *   ツイート1の内容
+ *   ---
+ *   ツイート2の内容
+ *   ---
+ *   ツイート3の内容
  */
 
 import { TwitterApi } from 'twitter-api-v2';
@@ -41,13 +47,19 @@ function createTwitterClient() {
 }
 
 /**
- * スレッドを投稿
+ * スレッドを投稿（1回のAPI呼び出しでまとめて処理）
  */
 async function postThread(client, tweets) {
   try {
     console.log(`🧵 ${tweets.length}つのツイートでスレッドを作成します\n`);
+    console.log('📝 投稿内容:');
+    tweets.forEach((tweet, index) => {
+      console.log(`--- ツイート ${index + 1} ---`);
+      console.log(tweet);
+      console.log('');
+    });
 
-    // tweetThread メソッドを使用
+    // tweetThread メソッドを使用（内部的に連続投稿）
     const thread = await client.v2.tweetThread(tweets);
 
     console.log('✅ スレッド投稿成功！');
@@ -63,19 +75,26 @@ async function postThread(client, tweets) {
   } catch (error) {
     console.error('❌ スレッド投稿に失敗しました');
     console.error(`   ${error.message}`);
+    
+    if (error.code === 429) {
+      console.error('\n⚠️  レート制限（429エラー）が発生しました');
+      console.error('   Freeプラン: 500 posts/月（約17 posts/日）');
+      console.error('   数時間待ってから再試行してください');
+    }
+    
     throw error;
   }
 }
 
 /**
- * ファイルからツイートを読み込み
+ * マークダウンファイルからツイートを読み込み（---で区切る）
  */
-function readTweetsFromFile(filePath) {
+function readTweetsFromMarkdown(filePath) {
   const content = readFileSync(filePath, 'utf-8');
   
-  // 空行で区切られたツイートに分割
+  // --- で区切られたツイートに分割
   const tweets = content
-    .split(/\n\s*\n/)
+    .split(/^---$/gm)
     .map(t => t.trim())
     .filter(t => t.length > 0);
 
@@ -110,7 +129,7 @@ async function main() {
       console.log('   使い方: node scripts/post-thread.js --file <ファイルパス>');
       process.exit(1);
     }
-    tweets = readTweetsFromFile(filePath);
+    tweets = readTweetsFromMarkdown(filePath);
   } else {
     // 引数をツイートとして使用
     tweets = args.filter(arg => !arg.startsWith('--'));
@@ -119,15 +138,14 @@ async function main() {
   if (tweets.length === 0) {
     console.log('📖 X スレッド投稿スクリプト\n');
     console.log('使い方:');
-    console.log('  node scripts/post-thread.js "ツイート1" "ツイート2" "ツイート3"');
-    console.log('  node scripts/post-thread.js --file <ファイルパス>');
-    console.log('  node scripts/post-thread.js --test\n');
-    console.log('ファイル形式（空行で区切る）:');
+    console.log('  node scripts/post-thread.js --file RELEASE_NOTES.md\n');
+    console.log('ファイル形式（---でツイートを区切る）:');
     console.log('  ツイート1の内容');
-    console.log('  ');
+    console.log('  ---');
     console.log('  ツイート2の内容');
-    console.log('  ');
-    console.log('  ツイート3の内容');
+    console.log('  ---');
+    console.log('  ツイート3の内容\n');
+    console.log('参考: node scripts/post-thread.js --test');
     process.exit(0);
   }
 

@@ -160,7 +160,18 @@ npm run thread:test
 # 複数のツイートでスレッドを作成
 node scripts/post-thread.js "ツイート1" "ツイート2" "ツイート3"
 
-# ファイルからスレッド投稿（空行で区切る）
+# ファイルからスレッド投稿（---で区切る）
+node scripts/post-thread.js --file RELEASE_NOTES.md
+
+**ファイル形式:**
+```/
+ツイート1の内容
+---
+ツイート2の内容
+---
+ツイート3の内容
+```
+```
 node scripts/post-thread.js --file example/RELEASE_NOTES.md
 ```
 **通常のタイムライン投稿は `POST /2/tweets` エンドメントを使用します**

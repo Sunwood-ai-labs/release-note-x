@@ -1,26 +1,33 @@
-🚀 Release Note X v1.0.0
+🚀 Release Note X v1.0.0 がリリースされました！
 
-新しい機能がリリースされました！
+GitHubリリースノートをX (Twitter) に自動投稿するシステムです。
+---
 
-主な変更点：
-- X (Twitter) への自動投稿機能
-- スレッド投稿対応
-- コマンドラインインターフェース
+主な機能：
 
-使い方：
+✨ シングル投稿 - npm run post "メッセージ"
+🧵 スレッド投稿 - npm run thread --file notes.md
+🧪 テスト投稿 - npm run post:test
+---
 
-npm run post:test でテスト投稿ができます。
+使い方の例：
 
-また、スレッド投稿も可能です：
+# 単一投稿
+node scripts/post-x.js "こんにちは、世界！"
 
-npm run thread:test
+# スレッド投稿
+node scripts/post-thread.js --file RELEASE_NOTES.md
+---
 
 今後の予定：
-- AIによるリリースノート要約
-- GitHub Webhook連携
-- CI/CD統合
+
+🤖 AIによるリリースノート要約
+🔗 GitHub Webhook連携  
+🚀 CI/CD統合
+---
 
 詳細はこちら：
+
 https://github.com/Sunwood-ai-labs/release-note-x
 
-#ReleaseNoteX #GitHub #X #Twitter
+#ReleaseNoteX #GitHub #X #Twitter #Dev
