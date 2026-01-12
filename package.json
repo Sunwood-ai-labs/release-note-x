@@ -1,0 +1,27 @@
+{
+  "name": "release-note-x",
+  "version": "0.1.0",
+  "description": "GitHubリリースノートを要約してXに投稿するシステム",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "post": "node scripts/post-x.js",
+    "post:test": "node scripts/post-x.js --test",
+    "summarize": "node scripts/ai-summarize.js"
+  },
+  "keywords": [
+    "github",
+    "twitter",
+    "x",
+    "release-notes"
+  ],
+  "author": "Sunwood-ai-labs",
+  "license": "MIT",
+  "dependencies": {
+    "twitter-api-v2": "^1.15.2",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0"
+  }
+}
