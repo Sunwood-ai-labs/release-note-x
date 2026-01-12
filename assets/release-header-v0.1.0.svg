@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <!-- Background gradient using deep blue (Launch theme) -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a2540;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e3a5f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0a2540;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Cyan accent gradient (Launch/New) -->
+    <linearGradient id="accent1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0099cc;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Purple accent gradient (Innovation) -->
+    <linearGradient id="accent2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9b59b6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6c3483;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Blue-Purple gradient -->
+    <linearGradient id="accent3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2c3e50;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Version gradient -->
+    <linearGradient id="versionGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#9b59b6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Strong glow for version -->
+    <filter id="strongGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Shadow for depth -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+
+    <!-- Star sparkle animation -->
+    <style>
+      @keyframes twinkle {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 1; }
+      }
+      .star { animation: twinkle 2s ease-in-out infinite; }
+      .star-delay-1 { animation-delay: 0.5s; }
+      .star-delay-2 { animation-delay: 1s; }
+      .star-delay-3 { animation-delay: 1.5s; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="300" fill="url(#bgGradient)"/>
+
+  <!-- Launch celebration rays (background) -->
+  <g opacity="0.1">
+    <line x1="600" y1="150" x2="200" y2="50" stroke="url(#accent1)" stroke-width="2"/>
+    <line x1="600" y1="150" x2="200" y2="150" stroke="url(#accent1)" stroke-width="2"/>
+    <line x1="600" y1="150" x2="200" y2="250" stroke="url(#accent1)" stroke-width="2"/>
+    <line x1="600" y1="150" x2="1000" y2="50" stroke="url(#accent2)" stroke-width="2"/>
+    <line x1="600" y1="150" x2="1000" y2="150" stroke="url(#accent2)" stroke-width="2"/>
+    <line x1="600" y1="150" x2="1000" y2="250" stroke="url(#accent2)" stroke-width="2"/>
+    <line x1="600" y1="150" x2="400" y2="50" stroke="url(#accent3)" stroke-width="2"/>
+    <line x1="600" y1="150" x2="800" y2="50" stroke="url(#accent3)" stroke-width="2"/>
+  </g>
+
+  <!-- Decorative corner elements -->
+  <path d="M0,0 L200,0 Q100,100 0,150 Z" fill="url(#accent1)" opacity="0.12"/>
+  <path d="M1200,300 L1000,300 Q1100,200 1200,150 Z" fill="url(#accent2)" opacity="0.12"/>
+
+  <!-- Abstract circles (celebration confetti) -->
+  <circle cx="80" cy="60" r="50" fill="url(#accent1)" opacity="0.15"/>
+  <circle cx="1120" cy="240" r="60" fill="url(#accent2)" opacity="0.15"/>
+  <circle cx="180" cy="240" r="35" fill="url(#accent3)" opacity="0.12"/>
+  <circle cx="1020" cy="60" r="45" fill="url(#accent1)" opacity="0.12"/>
+
+  <!-- Stars (sparkles for initial release) -->
+  <g class="star" fill="#00d4ff">
+    <polygon points="150,70 155,85 170,85 158,95 163,110 150,100 137,110 142,95 130,85 145,85" opacity="0.6"/>
+  </g>
+  <g class="star star-delay-1" fill="#9b59b6">
+    <polygon points="1050,230 1053,240 1063,240 1055,246 1058,256 1050,250 1042,256 1045,246 1037,240 1047,240" opacity="0.6"/>
+  </g>
+  <g class="star star-delay-2" fill="#00d4ff">
+    <polygon points="200,200 203,210 213,210 205,216 208,226 200,220 192,226 195,216 187,210 197,210" opacity="0.5"/>
+  </g>
+  <g class="star star-delay-3" fill="#9b59b6">
+    <polygon points="1000,80 1003,90 1013,90 1005,96 1008,106 1000,100 992,106 995,96 987,90 997,90" opacity="0.5"/>
+  </g>
+  <g class="star" fill="#00d4ff">
+    <polygon points="250,120 252,127 260,127 254,132 256,139 250,134 244,139 246,132 240,127 248,127" opacity="0.4"/>
+  </g>
+  <g class="star star-delay-1" fill="#9b59b6">
+    <polygon points="950,180 952,187 960,187 954,192 956,199 950,194 944,199 946,192 940,187 948,187" opacity="0.4"/>
+  </g>
+
+  <!-- Rocket/Launch icon -->
+  <text x="600" y="85" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="url(#accent1)" text-anchor="middle" filter="url(#glow)">🚀</text>
+
+  <!-- Version badge -->
+  <g filter="url(#strongGlow)">
+    <rect x="515" y="105" width="170" height="45" rx="22.5" fill="url(#versionGradient)" opacity="0.9"/>
+    <text x="600" y="137" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">v0.1.0</text>
+  </g>
+
+  <!-- Release title -->
+  <text x="600" y="185" font-family="Arial, sans-serif" font-size="52" font-weight="bold" fill="white" text-anchor="middle" filter="url(#glow)">Initial Release</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="220" font-family="'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="300" letter-spacing="2" fill="url(#accent1)" text-anchor="middle" opacity="0.95">GitHub Release Notes → X Auto Poster</text>
+
+  <!-- Decorative line with gradient -->
+  <defs>
+    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d4ff;stop-opacity:0" />
+      <stop offset="50%" style="stop-color:#9b59b6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0" />
+    </linearGradient>
+  </defs>
+  <line x1="380" y1="250" x2="820" y2="250" stroke="url(#lineGradient)" stroke-width="3"/>
+
+  <!-- Small accent dots -->
+  <circle cx="375" cy="250" r="4" fill="#00d4ff"/>
+  <circle cx="825" cy="250" r="4" fill="#9b59b6"/>
+
+  <!-- Initial release badge at bottom -->
+  <text x="600" y="280" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle" opacity="0.6" letter-spacing="4">FIRST LAUNCH</text>
+</svg>
