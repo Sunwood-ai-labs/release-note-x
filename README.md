@@ -150,6 +150,19 @@ X_BEARER_TOKEN=your_bearer_token_here
 
 ### X API v2 で投稿する仕組み
 
+
+### スレッド投稿
+
+```bash
+# テストスレッド投稿
+npm run thread:test
+
+# 複数のツイートでスレッドを作成
+node scripts/post-thread.js "ツイート1" "ツイート2" "ツイート3"
+
+# ファイルからスレッド投稿（空行で区切る）
+node scripts/post-thread.js --file example/RELEASE_NOTES.md
+```
 **通常のタイムライン投稿は `POST /2/tweets` エンドメントを使用します**
 
 このエンドポイントは公式APIで完全サポートされており、以下の機能が利用可能です：
