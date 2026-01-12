@@ -3,6 +3,16 @@ name: Release to X
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: 'リリース名（例: v0.1.0 - Initial Release）'
+        required: true
+        type: string
+      release_url:
+        description: 'リリースURL'
+        required: true
+        type: string
 
 jobs:
   post-to-x:
@@ -20,7 +30,12 @@ jobs:
         run: npm install
 
       - name: Post release to X
-        run: node scripts/post-release.js "${{ github.event.release.name }}" "${{ github.event.release.html_url }}"
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            node scripts/post-release.js "${{ inputs.release_name }}" "${{ inputs.release_url }}"
+          else
+            node scripts/post-release.js "${{ github.event.release.name }}" "${{ github.event.release.html_url }}"
+          fi
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
