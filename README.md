@@ -9,7 +9,6 @@
 GitHubリリースノートを要約してXに投稿するシステム
 
 > **✅ 通常のタイムライン投稿は公式APIで完全サポートされています**
->
 
 ## 🚀 Features
 
@@ -54,6 +53,7 @@ cp .env.example .env
 #### 専用アカウントを作りたい場合
 
 **手順:**
+
 1. [X.com](https://x.com/) にアクセス
 2. 通常通りアカウントを作成
 3. **「Automated」ラベルを追加（推奨）:**
@@ -82,25 +82,31 @@ cp .env.example .env
 以下の質問に答える必要があります。コピーして使用してください:
 
 ---
+
 **Q: Describe all of your use cases of X's data and API**
 
 I will create a bot that automatically posts GitHub release notes to X (Twitter).
 
 **Use Case:**
+
 - Monitor GitHub repositories for new releases
 - Summarize release notes using AI (optional)
 - Post formatted release announcements to X
 
 **Purpose:**
+
 Automate the sharing of software project updates with followers on X.
 
 **Data Used:**
+
 - POST /2/tweets endpoint for posting tweets only
 - No reading of user data, timelines, or search functionality
 
 **Classification:**
+
 - App Type: Bot / Automated App
 - Access Level: Read and Write (for posting tweets)
+
 ---
 
 6. 開発者利用規約に同意
@@ -109,9 +115,10 @@ Automate the sharing of software project updates with followers on X.
 8. プロジェクトを作成:
    - プロジェクト名を入力（例: `release-note-x`）
    - アプリを作成
-8. API Keys & Tokens を取得
+9. API Keys & Tokens を取得
 
 **取得する認証情報:**
+
 - **API Key** (Consumer Key)
 - **API Secret** (Consumer Secret)
 - **Access Token**
@@ -119,7 +126,6 @@ Automate the sharing of software project updates with followers on X.
 - **Bearer Token** (オプション)
 
 > **✅ 自分のアカウントで手軽に始められます！** 追加アカウント作成は不要です。
-
 
 ### 3. 環境変数の設定
 
@@ -132,14 +138,18 @@ X_API_SECRET=your_api_secret_here
 X_ACCESS_TOKEN=your_access_token_here
 X_ACCESS_SECRET=your_access_secret_here
 X_BEARER_TOKEN=your_bearer_token_here
+```
 
 ### 4. 依存パッケージ
 
 ```json
 {
   "dependencies": {
-    "twitter-api-v2": "^1.22.0",
+    "twitter-api-v2": "^1.15.2",
     "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0"
   }
 }
 ```
@@ -147,49 +157,6 @@ X_BEARER_TOKEN=your_bearer_token_here
 > **💡 注意:** `twitter-api-v2` はX (Twitter) APIの仕様変更により、今後メンテナンスされない可能性があります。詳細は [twitter-api-v2 on npm](https://www.npmjs.com/package/twitter-api-v2) を参照。
 
 ## 🛠️ Usage
-
-### X API v2 で投稿する仕組み
-
-
-### スレッド投稿
-
-```bash
-# テストスレッド投稿
-npm run thread:test
-
-# 複数のツイートでスレッドを作成
-node scripts/post-thread.js "ツイート1" "ツイート2" "ツイート3"
-
-# ファイルからスレッド投稿（---で区切る）
-node scripts/post-thread.js --file RELEASE_NOTES.md
-
-**ファイル形式:**
-```/
-ツイート1の内容
----
-ツイート2の内容
----
-ツイート3の内容
-```
-```
-node scripts/post-thread.js --file example/RELEASE_NOTES.md
-```
-**通常のタイムライン投稿は `POST /2/tweets` エンドメントを使用します**
-
-このエンドポイントは公式APIで完全サポートされており、以下の機能が利用可能です：
-
-- ✅ テキスト投稿（最大500文字）
-- ✅ 画像/動画添付
-- ✅ リプライ
-- ✅ リンク付き投稿
-- ✅ ハッシュタグ
-- ✅ メンション
-
-**APIエンドポイント:** `POST https://api.x.com/2/tweets`
-
-**認証方式:** OAuth 1.0a User Context または OAuth 2.0
-
-参考: [Create or Edit Post - X API Documentation](https://docs.x.com/x-api/posts/create-post)
 
 ### CLIで投稿をテスト
 
@@ -199,7 +166,6 @@ npm run post:test
 
 # カスタムメッセージを投稿
 npm run post "こんにちは、世界！"
-
 ```
 
 ### スクリプト直接実行
@@ -215,33 +181,28 @@ node scripts/post-x.js "投稿内容"
 node scripts/post-x.js
 ```
 
-## 📁 Project Structure
+### スレッド投稿
 
-```
-release-note-x/
-├── scripts/
-│   ├── post-x.js          # X投稿スクリプト
-│   ├── ai-summarize.js    # AI要約スクリプト（予定）
-│   └── types.ts           # 型定義（予定）
-├── .github/
-│   └── workflows/
-│       └── release-to-x.yml  # GitHub Actions（予定）
-├── assets/
-│   └── header.svg         # ヘッダー画像
-├── package.json
-├── .env.example
-└── README.md
+```bash
+# テストスレッド投稿
+npm run thread:test
+
+# 複数のツイートでスレッドを作成
+node scripts/post-thread.js "ツイート1" "ツイート2" "ツイート3"
+
+# ファイルからスレッド投稿（---で区切る）
+node scripts/post-thread.js --file example/RELEASE_NOTES.md
 ```
 
-## 🔧 Configuration
+**ファイル形式:**
 
-| Environment Variable | 必須 | 説明 |
-|---------------------|:----:|-------------|
-| `X_API_KEY` | ✅ | X (Twitter) API Key |
-| `X_API_SECRET` | ✅ | X (Twitter) API Secret |
-| `X_ACCESS_TOKEN` | ✅ | X (Twitter) Access Token |
-| `X_ACCESS_SECRET` | ✅ | X (Twitter) Access Secret |
-| `X_BEARER_TOKEN` | ⚠️ | Bearer Token (一部APIで必要) |
+```markdown
+ツイート1の内容
+---
+ツイート2の内容
+---
+ツイート3の内容
+```
 
 ## 🔄 GitHub Actions 連携
 
@@ -261,23 +222,19 @@ GitHubリリースと連動して自動的にXに投稿できます！
 
 3. 変更をプッシュ
 
-### 使用方法
-
-リリースを作成すると、自動的に以下の内容がXに投稿されます：
-
-```
-🚀 リリース名
-
-リリースURL```
-
-**手動でテスト:**
-
-#### Secretsの設定（簡易方法）
+### Secretsの設定（簡易方法）
 
 **自動同期スクリプトを使用:**
 
 ```bash
 # .envからGitHub Secretsに同期
+npm run sync-secrets
+
+# 既存のSecretを上書き
+npm run sync-secrets --force
+```
+
+このスクリプトは `.env` ファイルの内容をGitHub Secretsに自動転送します。
 
 または、手動でSecretsを設定することもできます：
 
@@ -296,24 +253,60 @@ GitHubリリースと連動して自動的にXに投稿できます！
 
 4. **Add secret** をクリックして保存
 
-npm run sync-secrets
+### 使用方法
 
-# 既存のSecretを上書き
-npm run sync-secrets --force
+リリースを作成すると、自動的に以下の内容がXに投稿されます：
+
+```
+🚀 リリース名
+
+リリースURL
 ```
 
-このスクリプトは `.env` ファイルの内容をGitHub Secretsに自動転送します。
+**手動でテスト:**
 
 ```bash
 node scripts/post-release.js "v1.0.0" "https://github.com/user/repo/releases/tag/v1.0.0"
 ```
 
+## 📁 Project Structure
+
+```
+release-note-x/
+├── scripts/
+│   ├── post-x.js           # X投稿スクリプト
+│   ├── post-thread.js     # スレッド投稿スクリプト
+│   ├── post-release.js    # リリース通知スクリプト
+│   └── sync-secrets.sh    # Secrets同期スクリプト
+├── .github/workflows/
+│   └── release-to-x.yml   # GitHub Actions
+├── assets/
+│   └── header.svg         # ヘッダー画像
+├── example/
+│   └── RELEASE_NOTES.md   # サンプル
+├── package.json
+├── .env.example
+└── README.md
+```
+
+## 🔧 Configuration
+
+| Environment Variable | 必須 | 説明 |
+|---------------------|:----:|-------------|
+| `X_API_KEY` | ✅ | X (Twitter) API Key |
+| `X_API_SECRET` | ✅ | X (Twitter) API Secret |
+| `X_ACCESS_TOKEN` | ✅ | X (Twitter) Access Token |
+| `X_ACCESS_SECRET` | ✅ | X (Twitter) Access Secret |
+| `X_BEARER_TOKEN` | ⚠️ | Bearer Token (一部APIで必要) |
+
 ## 🚧 Roadmap
 
 - [x] X (Twitter) 投稿機能
-- [ ] AIによるリリースノート要約
+- [x] スレッド投稿機能
 - [x] GitHub Actions 連携
-- [ ] GitHub Actions ワークフロー
+- [x] GitHub Secrets 同期ツール
+- [ ] AIによるリリースノート要約
+- [ ] GitHub Webhook 連携
 - [ ] CircleCI Orb
 - [ ] 複数リポジトリ監視
 - [ ] 投稿履歴管理
@@ -328,6 +321,20 @@ node scripts/post-release.js "v1.0.0" "https://github.com/user/repo/releases/tag
 - **公式APIで完全サポートされています**
 - テキスト、画像、リプライなどすべて機能します
 - `twitter-api-v2` ライブラリの `client.v2.tweet()` メソッドで利用可能
+
+### Q: X API Communities 機能について
+
+**コミュニティへの投稿は非公式のみ**
+
+現在、X API v2には**コミュニティに投稿する公式エンドポイントはありません**。
+
+- [X API Communities Lookup](https://docs.x.com/x-api/communities/lookup/introduction) では情報の取得のみ可能
+- **コミュニティに投稿する公式エンドポイントはありません**
+
+**回避策:**
+
+1. 通常のタイムラインに投稿 → 手動で「コミュニティに共有」
+2. XのアプリまたはWebから直接コミュニティに投稿
 
 ### 参考リンク
 

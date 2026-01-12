@@ -1,48 +1,77 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMid meet">
   <defs>
-    <!-- Gradient for Social/AI theme -->
+    <!-- Background gradient using dark teal -->
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#025159;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#013d42;stop-opacity:1" />
     </linearGradient>
 
-    <!-- X/Twitter brand colors -->
+    <!-- Gold accent gradient -->
     <linearGradient id="accent1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1DA1F2;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0D8BD9;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#F2C641;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F2AB27;stop-opacity:1" />
     </linearGradient>
 
+    <!-- Orange accent gradient -->
     <linearGradient id="accent2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#7847E0;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#5E3ACD;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#F2AB27;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#BF573F;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Terracotta gradient -->
+    <linearGradient id="accent3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#BF573F;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#730C02;stop-opacity:1" />
     </linearGradient>
 
     <!-- Glow filter -->
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
+    </filter>
+
+    <!-- Shadow for depth -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
     </filter>
   </defs>
 
   <!-- Background -->
   <rect width="1200" height="300" fill="url(#bgGradient)"/>
 
-  <!-- Abstract shapes -->
-  <circle cx="100" cy="150" r="80" fill="url(#accent1)" opacity="0.3"/>
-  <circle cx="1100" cy="150" r="80" fill="url(#accent2)" opacity="0.3"/>
+  <!-- Decorative corner elements -->
+  <path d="M0,0 L200,0 Q100,100 0,150 Z" fill="url(#accent1)" opacity="0.15"/>
+  <path d="M1200,300 L1000,300 Q1100,200 1200,150 Z" fill="url(#accent3)" opacity="0.15"/>
+
+  <!-- Abstract circles -->
+  <circle cx="100" cy="80" r="60" fill="url(#accent1)" opacity="0.2"/>
+  <circle cx="1100" cy="220" r="70" fill="url(#accent2)" opacity="0.2"/>
+  <circle cx="150" cy="220" r="40" fill="url(#accent3)" opacity="0.15"/>
+  <circle cx="1050" cy="80" r="50" fill="url(#accent1)" opacity="0.15"/>
 
   <!-- X icon representation -->
-  <text x="600" y="100" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="url(#accent1)" text-anchor="middle" opacity="0.9">𝕏</text>
+  <text x="600" y="95" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="url(#accent1)" text-anchor="middle" filter="url(#glow)">𝕏</text>
 
   <!-- Project name -->
   <text x="600" y="160" font-family="Arial, sans-serif" font-size="58" font-weight="bold" fill="white" text-anchor="middle" filter="url(#glow)">Release Note X</text>
 
   <!-- Tagline -->
-  <text x="600" y="210" font-family="Arial, sans-serif" font-size="20" fill="#a0a0a0" text-anchor="middle">GitHub Release Notes → X Auto Poster</text>
+  <text x="600" y="205" font-family="Arial, sans-serif" font-size="20" fill="#F2C641" text-anchor="middle" opacity="0.9">GitHub Release Notes → X Auto Poster</text>
 
-  <!-- Decorative elements -->
-  <line x1="380" y1="240" x2="820" y2="240" stroke="url(#accent2)" stroke-width="3" opacity="0.8"/>
+  <!-- Decorative line with gradient -->
+  <defs>
+    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#F2C641;stop-opacity:0" />
+      <stop offset="50%" style="stop-color:#F2C641;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F2C641;stop-opacity:0" />
+    </linearGradient>
+  </defs>
+  <line x1="380" y1="240" x2="820" y2="240" stroke="url(#lineGradient)" stroke-width="3"/>
+
+  <!-- Small accent dots -->
+  <circle cx="375" cy="240" r="4" fill="#F2AB27"/>
+  <circle cx="825" cy="240" r="4" fill="#F2AB27"/>
 </svg>
