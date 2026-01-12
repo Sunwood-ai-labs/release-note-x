@@ -272,6 +272,38 @@ GitHubリリースと連動して自動的にXに投稿できます！
 
 **手動でテスト:**
 
+#### Secretsの設定（簡易方法）
+
+**自動同期スクリプトを使用:**
+
+```bash
+# .envからGitHub Secretsに同期
+
+または、手動でSecretsを設定することもできます：
+
+**手動設定手順:**
+
+1. GitHubリポジトリの **Settings** → **Secrets and variables** → **Actions**
+2. **New repository secret** をクリック
+3. 以下のSecretsを追加：
+
+| Name | Secret |
+|------|--------|
+| `X_API_KEY` | .envの `X_API_KEY` の値 |
+| `X_API_SECRET` | .envの `X_API_SECRET` の値 |
+| `X_ACCESS_TOKEN` | .envの `X_ACCESS_TOKEN` の値 |
+| `X_ACCESS_SECRET` | .envの `X_ACCESS_SECRET` の値 |
+
+4. **Add secret** をクリックして保存
+
+npm run sync-secrets
+
+# 既存のSecretを上書き
+npm run sync-secrets --force
+```
+
+このスクリプトは `.env` ファイルの内容をGitHub Secretsに自動転送します。
+
 ```bash
 node scripts/post-release.js "v1.0.0" "https://github.com/user/repo/releases/tag/v1.0.0"
 ```

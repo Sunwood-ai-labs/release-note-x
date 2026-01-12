@@ -9,6 +9,7 @@
     "post:test": "node scripts/post-x.js --test",
     "thread": "node scripts/post-thread.js",
     "thread:test": "node scripts/post-thread.js --test",
+    "sync-secrets": "bash scripts/sync-secrets.sh",
     "summarize": "node scripts/ai-summarize.js"
   },
   "keywords": [
@@ -16,7 +17,8 @@
     "twitter",
     "x",
     "release-notes",
-    "thread"
+    "thread",
+    "ci-cd"
   ],
   "author": "Sunwood-ai-labs",
   "license": "MIT",
