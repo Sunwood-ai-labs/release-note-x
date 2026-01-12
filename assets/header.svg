@@ -58,8 +58,8 @@
   <!-- Project name -->
   <text x="600" y="160" font-family="Arial, sans-serif" font-size="58" font-weight="bold" fill="white" text-anchor="middle" filter="url(#glow)">Release Note X</text>
 
-  <!-- Tagline -->
-  <text x="600" y="205" font-family="Arial, sans-serif" font-size="20" fill="#F2C641" text-anchor="middle" opacity="0.9">GitHub Release Notes → X Auto Poster</text>
+  <!-- Tagline with stylish styling -->
+  <text x="600" y="205" font-family="'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="300" letter-spacing="3" fill="#F2C641" text-anchor="middle" opacity="0.95" style="text-transform: uppercase;">GitHub Release Notes → X Auto Poster</text>
 
   <!-- Decorative line with gradient -->
   <defs>
