@@ -243,11 +243,44 @@ release-note-x/
 | `X_ACCESS_SECRET` | ✅ | X (Twitter) Access Secret |
 | `X_BEARER_TOKEN` | ⚠️ | Bearer Token (一部APIで必要) |
 
+## 🔄 GitHub Actions 連携
+
+GitHubリリースと連動して自動的にXに投稿できます！
+
+### 設定方法
+
+1. GitHubリポジトリの **Settings** → **Secrets and variables** → **Actions**
+2. 以下のSecretsを追加：
+
+| Secret | 値 |
+|--------|---|
+| `X_API_KEY` | Developer PortalのAPI Key |
+| `X_API_SECRET` | Developer PortalのAPI Secret |
+| `X_ACCESS_TOKEN` | Developer PortalのAccess Token |
+| `X_ACCESS_SECRET` | Developer PortalのAccess Secret |
+
+3. 変更をプッシュ
+
+### 使用方法
+
+リリースを作成すると、自動的に以下の内容がXに投稿されます：
+
+```
+🚀 リリース名
+
+リリースURL```
+
+**手動でテスト:**
+
+```bash
+node scripts/post-release.js "v1.0.0" "https://github.com/user/repo/releases/tag/v1.0.0"
+```
+
 ## 🚧 Roadmap
 
 - [x] X (Twitter) 投稿機能
 - [ ] AIによるリリースノート要約
-- [ ] GitHub Webhook 連携
+- [x] GitHub Actions 連携
 - [ ] GitHub Actions ワークフロー
 - [ ] CircleCI Orb
 - [ ] 複数リポジトリ監視
