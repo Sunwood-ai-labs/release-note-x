@@ -59,24 +59,25 @@ async function postRelease(client, title, url) {
   } catch (error) {
     console.error('❌ 投稿に失敗しました');
     console.error(`   ${error.message}`);
-    
-    if (error.code === 429) {
+
+    if (error.code === 403) {
+      console.error('\n⚠️  権限エラー（403 Forbidden）');
+      console.error('   原因: X APIの権限設定が不十分です');
+      console.error('   解決策:');
+      console.error('   1. https://developer.x.com/en/portal/dashboard にアクセス');
+      console.error('   2. App Settings → Permissions → "Read and write" に変更');
+      console.error('   3. Access Tokenを再生成して.envを更新');
+    } else if (error.code === 429) {
       console.error('\n⚠️  レート制限（429エラー）が発生しました');
       console.error('   Freeプラン: 500 posts/月');
+    } else if (error.code === 401) {
+      console.error('\n⚠️  認証エラー（401 Unauthorized）');
+      console.error('   APIキーまたはトークンが無効です');
     }
-    
+
     throw error;
   }
 }
-
-async function main() {
-  const args = process.argv.slice(2);
-  
-  if (args.length < 2) {
-    console.error('❌ 引数が不足しています');
-    console.log('使い方: node scripts/post-release.js "リリース名" "リリースURL"');
-    process.exit(1);
-  }
 
   const [title, url] = args;
   const client = createTwitterClient();
