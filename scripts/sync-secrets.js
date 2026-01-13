@@ -19,6 +19,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 /**
+ * 値をマスクして表示（先頭4文字 + ****）
+ */
+function maskValue(value) {
+  if (!value || value.length < 4) return '****';
+  return `${value.substring(0, 4)}${'*'.repeat(Math.min(value.length - 4, 12))}`;
+}
+
+/**
  * .envファイルを読み込む
  */
 function loadEnvFile() {
@@ -54,12 +62,13 @@ function loadEnvFile() {
  */
 function setGitHubSecret(key, value) {
   try {
+    const masked = maskValue(value);
     // gh secret set コマンドを実行
-    execSync(`echo "${value}" | gh secret set ${key}`, { 
+    execSync(`echo "${value}" | gh secret set ${key}`, {
       stdio: 'pipe',
       stderr: 'pipe'
     });
-    console.log(`✅ ${key} → GitHub Secret`);
+    console.log(`✅ ${key} (${masked}) → GitHub Secret`);
   } catch (error) {
     console.error(`❌ ${key} の設定に失敗しました`);
     console.error(`   ${error.message}`);
@@ -121,7 +130,8 @@ async function main() {
 
   console.log(`📝 ${Object.keys(envVars).length}個の環境変数を検出しました:\n`);
   Object.keys(envVars).forEach(key => {
-    console.log(`   - ${key}`);
+    const masked = maskValue(envVars[key]);
+    console.log(`   - ${key}: ${masked}`);
   });
   console.log('');
 
