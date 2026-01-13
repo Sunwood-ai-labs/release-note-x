@@ -46,12 +46,14 @@ jobs:
           else
             RELEASE_NAME="${{ github.event.release.name }}"
             RELEASE_URL="${{ github.event.release.html_url }}"
-            RELEASE_NOTES="${{ github.event.release.body }}"
+            # Fetch release notes directly from GitHub to avoid shell expansion issues
+            RELEASE_NOTES=$(gh release view "${{ github.event.release.tag_name }}" --json body -q '.body')
           fi
 
-          # Export release notes to temp file for safe handling
-          # Use printf to avoid shell expansion of backticks and special chars
-          printf '%s' "$RELEASE_NOTES" > /tmp/release_notes.txt
+          # Write release notes to temp file using cat heredoc to avoid shell expansion
+          cat > /tmp/release_notes.txt << 'RELEASE_NOTES_EOF'
+          $RELEASE_NOTES
+          RELEASE_NOTES_EOF
 
           # Check if summarization is enabled (only for workflow_dispatch)
           ENABLE_SUMMARY="${{ inputs.enable_summarization == 'true' && 'true' || 'false' }}"
@@ -68,6 +70,7 @@ jobs:
           # Cleanup
           rm -f /tmp/release_notes.txt
         env:
+          GH_TOKEN: ${{ github.token }}
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
