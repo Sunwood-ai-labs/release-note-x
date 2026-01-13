@@ -39,15 +39,14 @@ jobs:
 
       - name: Post release to Discord
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            RELEASE_NAME="${{ inputs.release_name }}"
-            RELEASE_URL="${{ inputs.release_url }}"
-            RELEASE_NOTES='${{ inputs.release_notes }}'
-          else
-            RELEASE_NAME="${{ github.event.release.name }}"
-            RELEASE_URL="${{ github.event.release.html_url }}"
-            RELEASE_NOTES='${{ github.event.release.body }}'
-          fi
+          RELEASE_NAME="${{ inputs.release_name || github.event.release.name }}"
+          RELEASE_URL="${{ inputs.release_url || github.event.release.html_url }}"
+
+          # Read release notes from heredoc to handle special characters
+          RELEASE_NOTES=$(cat <<'RELEASE_NOTES_EOF'
+${{ inputs.release_notes || github.event.release.body }}
+RELEASE_NOTES_EOF
+)
 
           # Check if summarization is enabled (for both release and workflow_dispatch)
           # For release events: enabled by default if OPENAI_API_KEY is set
