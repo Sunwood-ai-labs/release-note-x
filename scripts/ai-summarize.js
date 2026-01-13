@@ -127,9 +127,7 @@ async function main() {
     console.log(releaseNotes);
     console.log('---\n');
 
-    const summary = await summarizeRelease(client, releaseNotes, {
-      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo'
-    });
+    const summary = await summarizeRelease(client, releaseNotes);
 
     console.log('\n📋 生成された要約:');
     console.log('---');

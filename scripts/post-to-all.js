@@ -105,9 +105,7 @@ async function postToDiscordWrapper(title, url, summary) {
 async function generateSummary(releaseNotes) {
   try {
     const client = createOpenAIClient();
-    const summary = await summarizeRelease(client, releaseNotes, {
-      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo'
-    });
+    const summary = await summarizeRelease(client, releaseNotes);
     return { success: true, summary };
   } catch (error) {
     console.warn('⚠️  AI要約に失敗しました。フォールバックを使用します');
