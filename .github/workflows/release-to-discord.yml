@@ -53,7 +53,13 @@ jobs:
           fi
           if [ "$ENABLE_SUMMARY" = "true" ] && [ -n "$RELEASE_NOTES" ]; then
             echo "📝 AI要約を生成します..."
-            SUMMARY=$(RELEASE_NOTES="$RELEASE_NOTES" node scripts/ai-summarize.js --quiet --env)
+            echo "RELEASE_NOTES length: ${#RELEASE_NOTES}"
+            echo "RELEASE_NOTES first 100 chars: ${RELEASE_NOTES:0:100}"
+            SUMMARY=$(RELEASE_NOTES="$RELEASE_NOTES" node scripts/ai-summarize.js --quiet --env 2>&1)
+            SUMMARIES_EXIT_CODE=$?
+            echo "ai-summarize exit code: $SUMMARIES_EXIT_CODE"
+            echo "SUMMARY length: ${#SUMMARY}"
+            echo "SUMMARY content: $SUMMARY"
             if [ -z "$SUMMARY" ]; then
               echo "⚠️ 要約が空だったため、フォールバックを使用します"
               SUMMARY="新しいリリースが利用可能です！"
