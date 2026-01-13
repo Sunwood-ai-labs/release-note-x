@@ -42,12 +42,6 @@ jobs:
           RELEASE_NAME="${{ inputs.release_name || github.event.release.name }}"
           RELEASE_URL="${{ inputs.release_url || github.event.release.html_url }}"
 
-          # Read release notes from heredoc to handle special characters
-          RELEASE_NOTES=$(cat <<'RELEASE_NOTES_EOF'
-${{ inputs.release_notes || github.event.release.body }}
-RELEASE_NOTES_EOF
-)
-
           # Check if summarization is enabled (for both release and workflow_dispatch)
           # For release events: enabled by default if OPENAI_API_KEY is set
           # For workflow_dispatch: use the input parameter
@@ -81,3 +75,4 @@ RELEASE_NOTES_EOF
           OPENROUTER_BASE_URL: ${{ secrets.OPENROUTER_BASE_URL }}
           OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL != '' && secrets.OPENROUTER_MODEL || 'z-ai/glm-4.5-air:free' }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL != '' && secrets.OPENAI_MODEL || 'gpt-3.5-turbo' }}
+          RELEASE_NOTES: ${{ inputs.release_notes != '' && inputs.release_notes || github.event.release.body }}
