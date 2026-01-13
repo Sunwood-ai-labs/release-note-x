@@ -50,7 +50,8 @@ jobs:
           fi
 
           # Export release notes to temp file for safe handling
-          echo "$RELEASE_NOTES" > /tmp/release_notes.txt
+          # Use printf to avoid shell expansion of backticks and special chars
+          printf '%s' "$RELEASE_NOTES" > /tmp/release_notes.txt
 
           # Check if summarization is enabled (only for workflow_dispatch)
           ENABLE_SUMMARY="${{ inputs.enable_summarization == 'true' && 'true' || 'false' }}"
