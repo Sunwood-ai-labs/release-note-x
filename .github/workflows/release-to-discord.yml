@@ -1,0 +1,65 @@
+name: Release to Discord
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_name:
+        description: 'リリース名（例: v0.1.0 - Initial Release）'
+        required: true
+        type: string
+      release_url:
+        description: 'リリースURL'
+        required: true
+        type: string
+      release_notes:
+        description: 'リリースノート（AI要約を使用する場合）'
+        required: false
+        type: string
+      enable_summarization:
+        description: 'AI要約を有効化'
+        type: boolean
+        default: false
+
+jobs:
+  post-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Post release to Discord
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RELEASE_NAME="${{ inputs.release_name }}"
+            RELEASE_URL="${{ inputs.release_url }}"
+            RELEASE_NOTES="${{ inputs.release_notes }}"
+          else
+            RELEASE_NAME="${{ github.event.release.name }}"
+            RELEASE_URL="${{ github.event.release.html_url }}"
+            RELEASE_NOTES="${{ github.event.release.body }}"
+          fi
+
+          # Check if summarization is enabled
+          if [ "${{ inputs.enable_summarization }}" = "true" ] && [ -n "$RELEASE_NOTES" ]; then
+            SUMMARY=$(node scripts/ai-summarize.js "$RELEASE_NOTES" 2>/dev/null | grep -A 100 "📋 生成された要約:" | tail -n +2 | head -n -1 | sed 's/^---//g' | tr -d '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            if [ -z "$SUMMARY" ]; then
+              SUMMARY="新しいリリースが利用可能です！"
+            fi
+            node scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL" "$SUMMARY"
+          else
+            node scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL"
+          fi
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-3.5-turbo' }}
