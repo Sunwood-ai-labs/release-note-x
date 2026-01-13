@@ -13,6 +13,14 @@ on:
         description: 'リリースURL'
         required: true
         type: string
+      release_notes:
+        description: 'リリースノート（AI要約を使用する場合）'
+        required: false
+        type: string
+      enable_summarization:
+        description: 'AI要約を有効化'
+        type: boolean
+        default: false
 
 jobs:
   post-to-x:
@@ -32,12 +40,27 @@ jobs:
       - name: Post release to X
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            node scripts/post-release.js "${{ inputs.release_name }}" "${{ inputs.release_url }}"
+            RELEASE_NAME="${{ inputs.release_name }}"
+            RELEASE_URL="${{ inputs.release_url }}"
+            RELEASE_NOTES="${{ inputs.release_notes }}"
           else
-            node scripts/post-release.js "${{ github.event.release.name }}" "${{ github.event.release.html_url }}"
+            RELEASE_NAME="${{ github.event.release.name }}"
+            RELEASE_URL="${{ github.event.release.html_url }}"
+            RELEASE_NOTES="${{ github.event.release.body }}"
+          fi
+
+          # Check if summarization is enabled
+          if [ "${{ inputs.enable_summarization }}" = "true" ] && [ -n "$RELEASE_NOTES" ]; then
+            node scripts/post-x.js "$(node scripts/ai-summarize.js "$RELEASE_NOTES" | tail -n 1)
+
+$RELEASE_URL"
+          else
+            node scripts/post-release.js "$RELEASE_NAME" "$RELEASE_URL"
           fi
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-3.5-turbo' }}
