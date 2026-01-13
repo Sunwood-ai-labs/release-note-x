@@ -51,9 +51,11 @@ jobs:
 
           # Check if summarization is enabled
           if [ "${{ inputs.enable_summarization }}" = "true" ] && [ -n "$RELEASE_NOTES" ]; then
-            node scripts/post-x.js "$(node scripts/ai-summarize.js "$RELEASE_NOTES" | tail -n 1)
-
-$RELEASE_URL"
+            SUMMARY=$(node scripts/ai-summarize.js "$RELEASE_NOTES" 2>/dev/null | grep -A 100 "📋 生成された要約:" | tail -n +2 | head -n -1 | sed 's/^---//g' | tr -d '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            if [ -z "$SUMMARY" ]; then
+              SUMMARY="$RELEASE_NAME"
+            fi
+            node scripts/post-x.js "$SUMMARY" "$RELEASE_URL"
           else
             node scripts/post-release.js "$RELEASE_NAME" "$RELEASE_URL"
           fi
