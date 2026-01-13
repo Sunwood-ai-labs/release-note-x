@@ -5,6 +5,7 @@
  *
  * 使い方:
  *   node scripts/post-x.js "投稿内容"
+ *   node scripts/post-x.js --with-ai "タイトル" "URL" "true" "リリースノート"
  *   node scripts/post-x.js --test
  */
 
@@ -12,6 +13,7 @@ import { TwitterApi } from 'twitter-api-v2';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { createOpenAIClient, summarizeRelease } from '../lib/openai-client.js';
 
 // ES Moduleで__dirnameを取得
 const __filename = fileURLToPath(import.meta.url);
@@ -115,7 +117,27 @@ async function main() {
   let text;
 
   // 引数の解析
-  if (args.includes('--test')) {
+  if (args[0] === '--with-ai') {
+    // AI要約モード
+    const title = args[1];
+    const url = args[2];
+    const enableSummary = args[3] === 'true';
+    const releaseNotes = args[4] || '';
+
+    if (enableSummary && releaseNotes) {
+      console.log('🤖 AI要約を生成します...');
+      try {
+        const aiClient = createOpenAIClient({ quiet: true });
+        text = await summarizeRelease(aiClient, releaseNotes, { quiet: true });
+        console.log('✅ AI要約を生成しました');
+      } catch (error) {
+        console.log(`⚠️ AI要約に失敗しました: ${error.message}`);
+        text = `🚀 ${title}\n\n${url}`;
+      }
+    } else {
+      text = `🚀 ${title}\n\n${url}`;
+    }
+  } else if (args.includes('--test')) {
     // テスト投稿
     text = getTestPost();
     console.log('🧪 テストモードで投稿します\n');
@@ -129,6 +151,7 @@ async function main() {
     console.log('📖 X 投稿スクリプト\n');
     console.log('使い方:');
     console.log('  node scripts/post-x.js "投稿内容"');
+    console.log('  node scripts/post-x.js --with-ai "タイトル" "URL" "true" "リリースノート"');
     console.log('  node scripts/post-x.js --test           # テスト投稿\n');
     process.exit(0);
   }
