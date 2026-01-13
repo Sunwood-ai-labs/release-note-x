@@ -41,41 +41,12 @@ jobs:
         run: |
           RELEASE_NAME="${{ inputs.release_name || github.event.release.name }}"
           RELEASE_URL="${{ inputs.release_url || github.event.release.html_url }}"
-
-          # Check if summarization is enabled (for both release and workflow_dispatch)
-          # For release events: enabled by default if OPENAI_API_KEY is set
-          # For workflow_dispatch: use the input parameter
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            ENABLE_SUMMARY="${{ inputs.enable_summarization == 'true' && 'true' || 'false' }}"
-          else
-            # For release events, enable summarization if OPENAI_API_KEY or OPENROUTER_API_KEY is set
-            ENABLE_SUMMARY="${{ (secrets.OPENAI_API_KEY != '' || secrets.OPENROUTER_API_KEY != '') && 'true' || 'false' }}"
-          fi
-          if [ "$ENABLE_SUMMARY" = "true" ] && [ -n "$RELEASE_NOTES" ]; then
-            echo "📝 AI要約を生成します..."
-            echo "RELEASE_NOTES length: ${#RELEASE_NOTES}"
-            echo "RELEASE_NOTES first 100 chars: ${RELEASE_NOTES:0:100}"
-            SUMMARY=$(RELEASE_NOTES="$RELEASE_NOTES" node scripts/ai-summarize.js --quiet --env 2>&1)
-            SUMMARIES_EXIT_CODE=$?
-            echo "ai-summarize exit code: $SUMMARIES_EXIT_CODE"
-            echo "SUMMARY length: ${#SUMMARY}"
-            echo "SUMMARY content: $SUMMARY"
-            if [ -z "$SUMMARY" ]; then
-              echo "⚠️ 要約が空だったため、フォールバックを使用します"
-              SUMMARY="新しいリリースが利用可能です！"
-            else
-              echo "✅ AI要約を生成しました"
-            fi
-            node scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL" "$SUMMARY"
-          else
-            node scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL"
-          fi
+          ENABLE_SUMMARY="${{ inputs.enable_summarization == 'true' || (secrets.OPENAI_API_KEY != '' || secrets.OPENROUTER_API_KEY != '') && 'true' || 'false' }}"
+          node scripts/post-discord.js --with-ai "$RELEASE_NAME" "$RELEASE_URL" "$ENABLE_SUMMARY" "$RELEASE_NOTES"
         env:
           GH_TOKEN: ${{ github.token }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          OPENROUTER_BASE_URL: ${{ secrets.OPENROUTER_BASE_URL }}
-          OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL != '' && secrets.OPENROUTER_MODEL || 'z-ai/glm-4.5-air:free' }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL != '' && secrets.OPENAI_MODEL || 'gpt-3.5-turbo' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || secrets.OPENROUTER_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL || secrets.OPENROUTER_BASE_URL }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || secrets.OPENROUTER_MODEL || 'z-ai/glm-4.5-air:free' }}
           RELEASE_NOTES: ${{ inputs.release_notes != '' && inputs.release_notes || github.event.release.body }}

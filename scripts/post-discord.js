@@ -5,6 +5,7 @@
  *
  * 使い方:
  *   node scripts/post-discord.js "タイトル" "URL"
+ *   node scripts/post-discord.js --with-ai "タイトル" "URL" "true" "リリースノート"
  *   node scripts/post-discord.js --test
  */
 
@@ -12,6 +13,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { createDiscordClient, createDiscordEmbed, postToDiscord } from '../lib/discord-client.js';
+import { createOpenAIClient, summarizeRelease, detectLanguage } from '../lib/openai-client.js';
 
 // ES Moduleで__dirnameを取得
 const __filename = fileURLToPath(import.meta.url);
@@ -58,9 +60,11 @@ async function main() {
     console.log('使い方:');
     console.log('  node scripts/post-discord.js "タイトル" "URL"');
     console.log('  node scripts/post-discord.js "タイトル" "URL" "要約"');
+    console.log('  node scripts/post-discord.js --with-ai "タイトル" "URL" "true" "リリースノート"');
     console.log('  node scripts/post-discord.js --test          # テスト投稿\n');
     console.log('環境変数:');
-    console.log('  DISCORD_WEBHOOK_URL - Discord Webhook URL (必須)\n');
+    console.log('  DISCORD_WEBHOOK_URL - Discord Webhook URL (必須)');
+    console.log('  OPENAI_API_KEY      - OpenAI/OpenRouter API Key (AI要約時必須)\n');
     process.exit(0);
   }
 
@@ -79,6 +83,24 @@ async function main() {
       url = testRelease.url;
       summary = testRelease.summary;
       console.log('🧪 テストモードでDiscordに投稿します\n');
+    } else if (args[0] === '--with-ai') {
+      // AI要約モード
+      title = args[1];
+      url = args[2];
+      const enableSummary = args[3] === 'true';
+      const releaseNotes = args[4] || '';
+
+      if (enableSummary && releaseNotes) {
+        console.log('🤖 AI要約を生成します...');
+        try {
+          const aiClient = createOpenAIClient({ quiet: true });
+          summary = await summarizeRelease(aiClient, releaseNotes, { quiet: true });
+          console.log('✅ AI要約を生成しました');
+        } catch (error) {
+          console.log(`⚠️ AI要約に失敗しました: ${error.message}`);
+          summary = `🚀 ${title}\n\n新しいリリースが利用可能です！`;
+        }
+      }
     } else {
       // 通常投稿
       title = args[0];
@@ -87,7 +109,7 @@ async function main() {
     }
 
     // 必須引数のチェック（テストモード以外）
-    if (!args.includes('--test') && (!title || !url)) {
+    if (!args.includes('--test') && !args.includes('--with-ai') && (!title || !url)) {
       console.log('❌ タイトルとURLは必須です');
       console.log('使い方: node scripts/post-discord.js "タイトル" "URL"');
       console.log('       node scripts/post-discord.js --test\n');
