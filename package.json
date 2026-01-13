@@ -9,22 +9,29 @@
     "post:test": "node scripts/post-x.js --test",
     "thread": "node scripts/post-thread.js",
     "thread:test": "node scripts/post-thread.js --test",
-    "sync-secrets": "bash scripts/sync-secrets.sh",
-    "summarize": "node scripts/ai-summarize.js"
+    "discord": "node scripts/post-discord.js",
+    "discord:test": "node scripts/post-discord.js --test",
+    "post:all": "node scripts/post-to-all.js",
+    "summarize": "node scripts/ai-summarize.js",
+    "sync-secrets": "bash scripts/sync-secrets.sh"
   },
   "keywords": [
     "github",
     "twitter",
     "x",
+    "discord",
     "release-notes",
     "thread",
-    "ci-cd"
+    "ci-cd",
+    "ai",
+    "openai"
   ],
   "author": "Sunwood-ai-labs",
   "license": "MIT",
   "dependencies": {
     "twitter-api-v2": "^1.15.2",
-    "dotenv": "^16.4.1"
+    "dotenv": "^16.4.1",
+    "openai": "^4.20.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0"

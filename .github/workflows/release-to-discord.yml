@@ -1,4 +1,4 @@
-name: Release to X
+name: Release to Discord
 
 on:
   release:
@@ -23,7 +23,7 @@ on:
         default: false
 
 jobs:
-  post-to-x:
+  post-to-discord:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Post release to X
+      - name: Post release to Discord
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             RELEASE_NAME="${{ inputs.release_name }}"
@@ -51,16 +51,15 @@ jobs:
 
           # Check if summarization is enabled
           if [ "${{ inputs.enable_summarization }}" = "true" ] && [ -n "$RELEASE_NOTES" ]; then
-            node scripts/post-x.js "$(node scripts/ai-summarize.js "$RELEASE_NOTES" | tail -n 1)
-
-$RELEASE_URL"
+            SUMMARY=$(node scripts/ai-summarize.js "$RELEASE_NOTES" 2>/dev/null | grep -A 100 "📋 生成された要約:" | tail -n +2 | head -n -1 | sed 's/^---//g' | tr -d '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            if [ -z "$SUMMARY" ]; then
+              SUMMARY="新しいリリースが利用可能です！"
+            fi
+            node scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL" "$SUMMARY"
           else
-            node scripts/post-release.js "$RELEASE_NAME" "$RELEASE_URL"
+            node scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL"
           fi
         env:
-          X_API_KEY: ${{ secrets.X_API_KEY }}
-          X_API_SECRET: ${{ secrets.X_API_SECRET }}
-          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
-          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-3.5-turbo' }}
