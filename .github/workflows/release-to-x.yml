@@ -42,9 +42,11 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             RELEASE_NAME="${{ inputs.release_name }}"
             RELEASE_URL="${{ inputs.release_url }}"
+            RELEASE_NOTES='${{ inputs.release_notes }}'
           else
             RELEASE_NAME="${{ github.event.release.name }}"
             RELEASE_URL="${{ github.event.release.html_url }}"
+            RELEASE_NOTES='${{ github.event.release.body }}'
           fi
 
           # Check if summarization is enabled (for both release and workflow_dispatch)
@@ -57,9 +59,13 @@ jobs:
             ENABLE_SUMMARY="${{ (secrets.OPENAI_API_KEY != '' || secrets.OPENROUTER_API_KEY != '') && 'true' || 'false' }}"
           fi
           if [ "$ENABLE_SUMMARY" = "true" ] && [ -n "$RELEASE_NOTES" ]; then
-            SUMMARY=$(node scripts/ai-summarize.js --quiet --env 2>/dev/null)
+            echo "📝 AI要約を生成します..."
+            SUMMARY=$(RELEASE_NOTES="$RELEASE_NOTES" node scripts/ai-summarize.js --quiet --env)
             if [ -z "$SUMMARY" ]; then
+              echo "⚠️ 要約が空だったため、フォールバックを使用します"
               SUMMARY="$RELEASE_NAME"
+            else
+              echo "✅ AI要約を生成しました"
             fi
             node scripts/post-x.js "$SUMMARY" "$RELEASE_URL"
           else
@@ -76,4 +82,3 @@ jobs:
           OPENROUTER_BASE_URL: ${{ secrets.OPENROUTER_BASE_URL }}
           OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL != '' && secrets.OPENROUTER_MODEL || 'z-ai/glm-4.5-air:free' }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL != '' && secrets.OPENAI_MODEL || 'gpt-3.5-turbo' }}
-          RELEASE_NOTES: ${{ github.event_name == 'workflow_dispatch' && inputs.release_notes || github.event.release.body }}
