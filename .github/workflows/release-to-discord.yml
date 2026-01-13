@@ -49,9 +49,13 @@ jobs:
             RELEASE_NOTES="${{ github.event.release.body }}"
           fi
 
-          # Check if summarization is enabled
-          if [ "${{ inputs.enable_summarization }}" = "true" ] && [ -n "$RELEASE_NOTES" ]; then
-            SUMMARY=$(node scripts/ai-summarize.js "$RELEASE_NOTES" 2>/dev/null | grep -A 100 "📋 生成された要約:" | tail -n +2 | head -n -1 | sed 's/^---//g' | tr -d '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+          # Export release notes to temp file for safe handling
+          echo "$RELEASE_NOTES" > /tmp/release_notes.txt
+
+          # Check if summarization is enabled (only for workflow_dispatch)
+          ENABLE_SUMMARY="${{ inputs.enable_summarization == 'true' && 'true' || 'false' }}"
+          if [ "$ENABLE_SUMMARY" = "true" ] && [ -s /tmp/release_notes.txt ]; then
+            SUMMARY=$(node scripts/ai-summarize.js --file /tmp/release_notes.txt 2>/dev/null | grep -A 100 "📋 生成された要約:" | tail -n +2 | head -n -1 | sed 's/^---//g' | tr -d '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
             if [ -z "$SUMMARY" ]; then
               SUMMARY="新しいリリースが利用可能です！"
             fi
@@ -59,7 +63,10 @@ jobs:
           else
             node scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL"
           fi
+
+          # Cleanup
+          rm -f /tmp/release_notes.txt
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-3.5-turbo' }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL != '' && secrets.OPENAI_MODEL || 'gpt-3.5-turbo' }}
