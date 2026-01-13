@@ -72,11 +72,13 @@ async function main() {
     console.log('使い方:');
     console.log('  node scripts/ai-summarize.js "リリースノート"');
     console.log('  node scripts/ai-summarize.js --file path/to/release-notes.md');
+    console.log('  node scripts/ai-summarize.js --env (RELEASE_NOTES環境変数から読み込み)');
     console.log('  node scripts/ai-summarize.js --test');
     console.log('  node scripts/ai-summarize.js --quiet (要約のみ出力)\n');
     console.log('環境変数:');
     console.log('  OPENAI_API_KEY - OpenAI APIキー (必須)');
-    console.log('  OPENAI_MODEL   - 使用するモデル (オプション、デフォルト: gpt-3.5-turbo)\n');
+    console.log('  OPENAI_MODEL   - 使用するモデル (オプション、デフォルト: gpt-3.5-turbo)');
+    console.log('  RELEASE_NOTES  - --env指定時にリリースノートを読み込む環境変数\n');
     process.exit(0);
   }
 
@@ -92,6 +94,14 @@ async function main() {
       // テストモード
       releaseNotes = getTestReleaseNotes();
       if (!quietMode) console.log('🧪 テストモードで要約を生成します\n');
+    } else if (args.includes('--env')) {
+      // 環境変数から読み込み（コードブロックや特殊文字対応）
+      releaseNotes = process.env.RELEASE_NOTES;
+      if (!releaseNotes) {
+        console.error('❌ RELEASE_NOTES環境変数が設定されていません');
+        process.exit(1);
+      }
+      if (!quietMode) console.log('📋 環境変数からリリースノートを読み込み\n');
     } else if (args.includes('--file')) {
       // ファイルから読み込み
       const fileIndex = args.indexOf('--file');

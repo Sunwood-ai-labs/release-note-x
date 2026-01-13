@@ -136,7 +136,8 @@ node scripts/ai-summarize.js --file path/to/release-notes.md
 | Secret | 値 |
 |--------|---|
 | `OPENROUTER_API_KEY` | OpenRouter API Key |
-| `OPENROUTER_MODEL` | `google/gemma-7b-it:free` (オプション) |
+| `OPENROUTER_BASE_URL` | `https://openrouter.ai/api/v1` (オプション) |
+| `OPENROUTER_MODEL` | `z-ai/glm-4.5-air:free` (オプション) |
 
 3. ワークフロー実行時に `enable_summarization: true` を指定
 

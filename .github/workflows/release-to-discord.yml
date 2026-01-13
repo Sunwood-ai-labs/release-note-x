@@ -42,18 +42,10 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             RELEASE_NAME="${{ inputs.release_name }}"
             RELEASE_URL="${{ inputs.release_url }}"
-            RELEASE_NOTES="${{ inputs.release_notes }}"
           else
             RELEASE_NAME="${{ github.event.release.name }}"
             RELEASE_URL="${{ github.event.release.html_url }}"
-            # Fetch release notes directly from GitHub to avoid shell expansion issues
-            RELEASE_NOTES=$(gh release view "${{ github.event.release.tag_name }}" --json body -q '.body')
           fi
-
-          # Write release notes to temp file using cat heredoc to avoid shell expansion
-          cat > /tmp/release_notes.txt << 'RELEASE_NOTES_EOF'
-          $RELEASE_NOTES
-          RELEASE_NOTES_EOF
 
           # Check if summarization is enabled (for both release and workflow_dispatch)
           # For release events: enabled by default if OPENAI_API_KEY is set
@@ -61,11 +53,11 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             ENABLE_SUMMARY="${{ inputs.enable_summarization == 'true' && 'true' || 'false' }}"
           else
-            # For release events, enable summarization if OPENAI_API_KEY is set
-            ENABLE_SUMMARY="${{ secrets.OPENAI_API_KEY != '' && 'true' || 'false' }}"
+            # For release events, enable summarization if OPENAI_API_KEY or OPENROUTER_API_KEY is set
+            ENABLE_SUMMARY="${{ (secrets.OPENAI_API_KEY != '' || secrets.OPENROUTER_API_KEY != '') && 'true' || 'false' }}"
           fi
-          if [ "$ENABLE_SUMMARY" = "true" ] && [ -s /tmp/release_notes.txt ]; then
-            SUMMARY=$(node scripts/ai-summarize.js --quiet --file /tmp/release_notes.txt 2>/dev/null)
+          if [ "$ENABLE_SUMMARY" = "true" ] && [ -n "$RELEASE_NOTES" ]; then
+            SUMMARY=$(node scripts/ai-summarize.js --quiet --env 2>/dev/null)
             if [ -z "$SUMMARY" ]; then
               SUMMARY="新しいリリースが利用可能です！"
             fi
@@ -73,11 +65,12 @@ jobs:
           else
             node scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL"
           fi
-
-          # Cleanup
-          rm -f /tmp/release_notes.txt
         env:
           GH_TOKEN: ${{ github.token }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_BASE_URL: ${{ secrets.OPENROUTER_BASE_URL }}
+          OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL != '' && secrets.OPENROUTER_MODEL || 'z-ai/glm-4.5-air:free' }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL != '' && secrets.OPENAI_MODEL || 'gpt-3.5-turbo' }}
+          RELEASE_NOTES: ${{ github.event_name == 'workflow_dispatch' && inputs.release_notes || github.event.release.body }}
