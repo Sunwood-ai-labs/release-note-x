@@ -58,8 +58,8 @@ jobs:
           echo "$RELEASE_NOTES" > /tmp/release_notes.txt
 
           # Check if summarization is enabled (only for workflow_dispatch)
-          ENABLE_SUMMARY="${{ inputs.enable_summarization == true && 'true' || 'false' }}"
-          if [ "$ENABLE_SUMMARY" = "true" ] && [ -s /tmp/release_notes.txt ]; then
+          # GitHub Actions boolean inputs are passed as strings "true" or "false"
+          if [ "${{ inputs.enable_summarization }}" = "true" ] && [ -s /tmp/release_notes.txt ]; then
             SUMMARY=$(node /tmp/release-note-x/scripts/ai-summarize.js --quiet --file /tmp/release_notes.txt 2>/dev/null)
             if [ -z "$SUMMARY" ]; then
               SUMMARY="新しいリリースが利用可能です！"
