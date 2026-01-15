@@ -5,24 +5,63 @@
 # 使い方:
 #   ./scripts/sync-secrets.sh
 #   ./scripts/sync-secrets.sh --force
+#   ./scripts/sync-secrets.sh --repo OWNER/REPO
+#   ./scripts/sync-secrets.sh --repo OWNER/REPO --force
 
 echo "🔐 GitHub Secrets 同期スクリプト"
 echo ""
 
-# .envファイルを読み込む
+# ターゲットリポジトリの解析
+TARGET_REPO=""
+
+for arg in "$@"; do
+  case $arg in
+    --repo=*)
+      TARGET_REPO="${arg#*=}"
+      shift
+      ;;
+    --repo)
+      shift
+      TARGET_REPO="$1"
+      shift
+      ;;
+  esac
+done
+
+# 現在のリポジトリを取得
+CURRENT_REPO=$(gh repo view --json owner,name -q '.owner.login + "/" + .name' 2>/dev/null)
+
+if [ -z "$TARGET_REPO" ]; then
+  TARGET_REPO="$CURRENT_REPO"
+fi
+
+echo "📂 同期先リポジトリ: $TARGET_REPO"
+if [ "$TARGET_REPO" != "$CURRENT_REPO" ]; then
+  echo "📂 現在のリポジトリ: $CURRENT_REPO"
+fi
+echo ""
+
+# .envファイルを読み込む（変数展開を防ぐ）
 env_vars=()
-while IFS='=' read -r key value; do
+while IFS= read -r line || [[ -n "$line" ]]; do
   # コメントと空行をスキップ
-  [[ "$key" =~ ^#.*$ ]] && continue
+  [[ "$line" =~ ^[[:space:]]*#.*$ ]] && continue
+  [[ -z "${line// }" ]] && continue
+
+  # 最初の=でキーと値に分割
+  key="${line%%=*}"
+  value="${line#*=}"
+
+  # 空のキーをスキップ
   [[ -z "$key" ]] && continue
-  
+
   # プレースホルダーをスキップ
   [[ "$value" =~ ^your_.*_here$ ]] && continue
   [[ -z "$value" ]] && continue
-  
+
   # Bearer Tokenは除外（Actionsでは不要）
   [[ "$key" = "X_BEARER_TOKEN" ]] && continue
-  
+
   env_vars+=("$key=$value")
 done < .env
 
@@ -55,12 +94,19 @@ echo ""
 success=0
 failed=0
 
+# gh secret set のオプションを構築
+GH_OPTS=""
+if [ "$TARGET_REPO" != "$CURRENT_REPO" ]; then
+  GH_OPTS="--repo $TARGET_REPO"
+fi
+
 for env in "${env_vars[@]}"; do
   key="${env%%=*}"
   value="${env#*=}"
-  
-  if echo "$value" | gh secret set "$key" 2>/dev/null; then
-    echo "✅ $key → GitHub Secret"
+
+  # 値をヒアドキュメントで渡して変数展開を防ぐ
+  if eval "gh secret set '$key' $GH_OPTS --body '$value'" 2>/dev/null; then
+    echo "✅ $key → $TARGET_REPO"
     ((success++))
   else
     echo "❌ $key の設定に失敗しました"
@@ -71,6 +117,7 @@ done
 echo ""
 if [ $success -gt 0 ]; then
   echo "✅ 同期完了！ ($success個成功、$failed個失敗)"
+  echo "📂 同期先: $TARGET_REPO"
 fi
 
 if [ $failed -gt 0 ]; then
@@ -79,5 +126,5 @@ fi
 
 echo ""
 echo "📋 次のステップ:"
-echo "   1. GitHubリポジトリの Settings → Secrets and variables → Actions で確認"
+echo "   1. $TARGET_REPO の Settings → Secrets and variables → Actions で確認"
 echo "   2. リリースを作成して自動投稿をテスト"
