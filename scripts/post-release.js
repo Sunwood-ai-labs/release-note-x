@@ -79,6 +79,15 @@ async function postRelease(client, title, url) {
   }
 }
 
+async function main() {
+  const args = process.argv.slice(2);
+
+  if (args.length < 2) {
+    console.error('❌ 引数が不足しています');
+    console.log('使い方: node scripts/post-release.js "リリース名" "リリースURL"');
+    process.exit(1);
+  }
+
   const [title, url] = args;
   const client = createTwitterClient();
 
