@@ -5,6 +5,8 @@
  *
  * 使い方:
  *   node scripts/post-discord.js "タイトル" "URL"
+ *   node scripts/post-discord.js "タイトル" "URL" "要約"
+ *   node scripts/post-discord.js --file "タイトル" "URL" "/path/to/summary.txt"
  *   node scripts/post-discord.js --with-ai "タイトル" "URL" "true" "リリースノート"
  *   node scripts/post-discord.js --test
  */
@@ -12,6 +14,7 @@
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { readFile } from 'fs/promises';
 import { createDiscordClient, createDiscordEmbed, postToDiscord } from '../lib/discord-client.js';
 import { createOpenAIClient, summarizeRelease, detectLanguage } from '../lib/openai-client.js';
 
@@ -60,6 +63,7 @@ async function main() {
     console.log('使い方:');
     console.log('  node scripts/post-discord.js "タイトル" "URL"');
     console.log('  node scripts/post-discord.js "タイトル" "URL" "要約"');
+    console.log('  node scripts/post-discord.js --file "タイトル" "URL" "/path/to/summary.txt"');
     console.log('  node scripts/post-discord.js --with-ai "タイトル" "URL" "true" "リリースノート"');
     console.log('  node scripts/post-discord.js --test          # テスト投稿\n');
     console.log('環境変数:');
@@ -101,6 +105,22 @@ async function main() {
           summary = `🚀 ${title}\n\n新しいリリースが利用可能です！`;
         }
       }
+    } else if (args[0] === '--file') {
+      // ファイルから読み込むモード（長いテキスト用）
+      title = args[1];
+      url = args[2];
+      const summaryPath = args[3];
+
+      if (summaryPath) {
+        try {
+          summary = await readFile(summaryPath, 'utf-8');
+        } catch (error) {
+          console.log(`⚠️ ファイルの読み込みに失敗しました: ${error.message}`);
+          summary = null;
+        }
+      } else {
+        summary = null;
+      }
     } else {
       // 通常投稿
       title = args[0];
@@ -109,7 +129,7 @@ async function main() {
     }
 
     // 必須引数のチェック（テストモード以外）
-    if (!args.includes('--test') && !args.includes('--with-ai') && (!title || !url)) {
+    if (!args.includes('--test') && !args.includes('--with-ai') && !args.includes('--file') && (!title || !url)) {
       console.log('❌ タイトルとURLは必須です');
       console.log('使い方: node scripts/post-discord.js "タイトル" "URL"');
       console.log('       node scripts/post-discord.js --test\n');

@@ -60,17 +60,18 @@ jobs:
           # Check if summarization is enabled (only for workflow_dispatch)
           # GitHub Actions boolean inputs are passed as strings "true" or "false"
           if [ "${{ inputs.enable_summarization }}" = "true" ] && [ -s /tmp/release_notes.txt ]; then
-            SUMMARY=$(node /tmp/release-note-x/scripts/ai-summarize.js --quiet --file /tmp/release_notes.txt 2>/dev/null)
-            if [ -z "$SUMMARY" ]; then
-              SUMMARY="新しいリリースが利用可能です！"
+            node /tmp/release-note-x/scripts/ai-summarize.js --quiet --file /tmp/release_notes.txt > /tmp/summary.txt 2>/dev/null || true
+            if [ ! -s /tmp/summary.txt ]; then
+              echo "新しいリリースが利用可能です！" > /tmp/summary.txt
             fi
-            node /tmp/release-note-x/scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL" "$SUMMARY"
+            node /tmp/release-note-x/scripts/post-discord.js --file "$RELEASE_NAME" "$RELEASE_URL" /tmp/summary.txt
           else
-            node /tmp/release-note-x/scripts/post-discord.js "$RELEASE_NAME" "$RELEASE_URL"
+            # Without summarization, post the original release notes
+            node /tmp/release-note-x/scripts/post-discord.js --file "$RELEASE_NAME" "$RELEASE_URL" /tmp/release_notes.txt
           fi
 
           # Cleanup
-          rm -f /tmp/release_notes.txt
+          rm -f /tmp/release_notes.txt /tmp/summary.txt
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

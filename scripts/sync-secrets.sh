@@ -7,22 +7,41 @@
 #   ./scripts/sync-secrets.sh --force
 #   ./scripts/sync-secrets.sh --repo OWNER/REPO
 #   ./scripts/sync-secrets.sh --repo OWNER/REPO --force
+#   ./scripts/sync-secrets.sh --repos "OWNER/REPO1,OWNER/REPO2"
+#   ./scripts/sync-secrets.sh --all
 
 echo "🔐 GitHub Secrets 同期スクリプト"
 echo ""
 
+# デフォルトのターゲットリポジトリ（カンマ区切り）
+DEFAULT_REPOS="Sunwood-ai-labs/MysticLibrary"
+
 # ターゲットリポジトリの解析
-TARGET_REPO=""
+TARGET_REPOS=()
+ALL_REPOS=false
 
 for arg in "$@"; do
   case $arg in
     --repo=*)
-      TARGET_REPO="${arg#*=}"
+      TARGET_REPOS=("${arg#*=}")
       shift
       ;;
     --repo)
       shift
-      TARGET_REPO="$1"
+      TARGET_REPOS=("$1")
+      shift
+      ;;
+    --repos=*)
+      IFS=',' read -ra TARGET_REPOS <<< "${arg#*=}"
+      shift
+      ;;
+    --repos)
+      shift
+      IFS=',' read -ra TARGET_REPOS <<< "$1"
+      shift
+      ;;
+    --all)
+      ALL_REPOS=true
       shift
       ;;
   esac
@@ -31,14 +50,28 @@ done
 # 現在のリポジトリを取得
 CURRENT_REPO=$(gh repo view --json owner,name -q '.owner.login + "/" + .name' 2>/dev/null)
 
-if [ -z "$TARGET_REPO" ]; then
-  TARGET_REPO="$CURRENT_REPO"
+# --all オプションの場合、デフォルトリポジトリ＋現在のリポジトリ
+if [ "$ALL_REPOS" = true ]; then
+  if [ -n "$DEFAULT_REPOS" ]; then
+    IFS=',' read -ra DEFAULT_REPOS_ARRAY <<< "$DEFAULT_REPOS"
+    TARGET_REPOS=("${DEFAULT_REPOS_ARRAY[@]}")
+  fi
+  # 現在のリポジトリを追加（まだ含まれていない場合）
+  if [[ ! " ${TARGET_REPOS[@]} " =~ " ${CURRENT_REPO} " ]]; then
+    TARGET_REPOS+=("$CURRENT_REPO")
+  fi
 fi
 
-echo "📂 同期先リポジトリ: $TARGET_REPO"
-if [ "$TARGET_REPO" != "$CURRENT_REPO" ]; then
-  echo "📂 現在のリポジトリ: $CURRENT_REPO"
+# ターゲットが空の場合は現在のリポジトリを使用
+if [ ${#TARGET_REPOS[@]} -eq 0 ]; then
+  TARGET_REPOS=("$CURRENT_REPO")
 fi
+
+echo "📂 同期先リポジトリ:"
+for repo in "${TARGET_REPOS[@]}"; do
+  echo "   - $repo"
+done
+echo "📂 現在のリポジトリ: $CURRENT_REPO"
 echo ""
 
 # .envファイルを読み込む（変数展開を防ぐ）
@@ -91,40 +124,59 @@ fi
 echo "🚀 GitHub Secretsに同期します..."
 echo ""
 
-success=0
-failed=0
+total_success=0
+total_failed=0
 
-# gh secret set のオプションを構築
-GH_OPTS=""
-if [ "$TARGET_REPO" != "$CURRENT_REPO" ]; then
-  GH_OPTS="--repo $TARGET_REPO"
-fi
+# 各リポジトリに同期
+for TARGET_REPO in "${TARGET_REPOS[@]}"; do
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "📂 $TARGET_REPO に同期中..."
+  echo ""
 
-for env in "${env_vars[@]}"; do
-  key="${env%%=*}"
-  value="${env#*=}"
+  success=0
+  failed=0
 
-  # 値をヒアドキュメントで渡して変数展開を防ぐ
-  if eval "gh secret set '$key' $GH_OPTS --body '$value'" 2>/dev/null; then
-    echo "✅ $key → $TARGET_REPO"
-    ((success++))
-  else
-    echo "❌ $key の設定に失敗しました"
-    ((failed++))
+  # gh secret set のオプションを構築
+  GH_OPTS=""
+  if [ "$TARGET_REPO" != "$CURRENT_REPO" ]; then
+    GH_OPTS="--repo $TARGET_REPO"
   fi
+
+  for env in "${env_vars[@]}"; do
+    key="${env%%=*}"
+    value="${env#*=}"
+
+    # 値をヒアドキュメントで渡して変数展開を防ぐ
+    if eval "gh secret set '$key' $GH_OPTS --body '$value'" 2>/dev/null; then
+      echo "✅ $key → $TARGET_REPO"
+      ((success++))
+      ((total_success++))
+    else
+      echo "❌ $key の設定に失敗しました"
+      ((failed++))
+      ((total_failed++))
+    fi
+  done
+
+  echo ""
+  if [ $success -gt 0 ]; then
+    echo "✅ $TARGET_REPO: $success個成功、$failed個失敗"
+  fi
+  echo ""
 done
 
-echo ""
-if [ $success -gt 0 ]; then
-  echo "✅ 同期完了！ ($success個成功、$failed個失敗)"
-  echo "📂 同期先: $TARGET_REPO"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+if [ $total_success -gt 0 ]; then
+  echo "✅ 同期完了！(合計: $total_success個成功、$total_failed個失敗)"
 fi
 
-if [ $failed -gt 0 ]; then
-  echo "⚠️  $failed個の設定に失敗しました"
+if [ $total_failed -gt 0 ]; then
+  echo "⚠️  $total_failed個の設定に失敗しました"
 fi
 
 echo ""
 echo "📋 次のステップ:"
-echo "   1. $TARGET_REPO の Settings → Secrets and variables → Actions で確認"
+for repo in "${TARGET_REPOS[@]}"; do
+  echo "   1. $repo の Settings → Secrets and variables → Actions で確認"
+done
 echo "   2. リリースを作成して自動投稿をテスト"
